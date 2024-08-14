@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import LiveCursors from "./cursor/LiveCursors";
 import { useMyPresence, useOthers } from "@liveblocks/react";
 import CursorChat from "./cursor/CursorChat";
@@ -40,6 +40,39 @@ function Live() {
 				y: e.clientY - e.currentTarget.getBoundingClientRect().y,
 			},
 		});
+	}, []);
+
+	useEffect(() => {
+		const onKeyUp = (e: KeyboardEvent) => {
+			if ((e.ctrlKey || e.metaKey) && e.key === "/") {
+				setCursorState({
+					mode: CursorMode.Chat,
+					previousMessage: null,
+					message: "",
+				});
+			} else if (e.key === "Escape") {
+				updateMyPresence({
+					message: "",
+				});
+
+				setCursorState({
+					mode: CursorMode.Hidden,
+				});
+			}
+		};
+		const onKeyDown = (e: KeyboardEvent) => {
+			if (e.key === "/") {
+				e.preventDefault();
+			}
+		};
+
+		window.addEventListener("keydown", onKeyDown);
+		window.addEventListener("keyup", onKeyUp);
+
+		return () => {
+			window.removeEventListener("keydown", onKeyDown);
+			window.removeEventListener("keyup", onKeyUp);
+		};
 	}, []);
 
 	return (
