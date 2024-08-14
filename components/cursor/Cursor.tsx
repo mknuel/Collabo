@@ -15,9 +15,20 @@ function Cursor({ color, x, y, message }: Props) {
 			style={{
 				transform: `translate(${x}px, ${y}px)`,
 			}}>
-            <CursorSVG color={color} />
-            
-            {/* Message */}
+			<CursorSVG color={color} />
+
+			{/* Message */}
+			{message && (
+				<div
+					className="rounded-3xl absolute left-2 top-5 px-4 py-2"
+					style={{
+						backgroundColor: color,
+					}}>
+					<p className="text-white text-sm leading-relaxed whitespace-nowrap">
+						{message}
+					</p>
+				</div>
+			)}
 		</div>
 	);
 }
