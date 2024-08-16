@@ -1,12 +1,16 @@
 import React, { useCallback, useEffect, useState } from "react";
 import LiveCursors from "./cursor/LiveCursors";
-import { useMyPresence, useOthers } from "@liveblocks/react";
+import {
+	useBroadcastEvent,
+	useEventListener,
+	useMyPresence,
+	useOthers,
+} from "@liveblocks/react";
 import CursorChat from "./cursor/CursorChat";
-import { CursorMode, CursorState, Reaction } from "@/types/type";
+import { CursorMode, CursorState, Reaction, ReactionEvent } from "@/types/type";
 import ReactionSelector from "./reaction/ReactionButton";
 import FlyingReaction from "./reaction/FlyingReaction";
 import useInterval from "@/hooks/useInterval";
-import { Timestamp } from "@liveblocks/react-comments/primitives";
 function Live() {
 	const others = useOthers();
 
@@ -16,7 +20,52 @@ function Live() {
 		mode: CursorMode.Hidden,
 	});
 
-	const [reactions, setReactions] = useState<Reaction[]>([]);
+	const [reaction, setReaction] = useState<Reaction[]>([]);
+
+	const broadcast = useBroadcastEvent();
+
+	useEventListener((eventData) => {
+		const event = eventData.event as ReactionEvent;
+		setReaction((reactions) =>
+			reactions.concat([
+				{
+					point: { x: event.x, y: event.y },
+					value: event.value,
+					timestamp: Date.now(),
+				},
+			])
+		);
+	});
+
+	useInterval(() => {
+		setReaction((reactions) =>
+			reactions.filter((r) => r.timestamp > Date.now() - 4000)
+		);
+	}, 1000);
+
+	useInterval(() => {
+		if (
+			cursorState.mode === CursorMode.Reaction &&
+			cursorState.isPressed &&
+			cursor
+		) {
+			console.log("is reacting");
+			setReaction((reactions) =>
+				reactions.concat([
+					{
+						point: { x: cursor.x, y: cursor.y },
+						value: cursorState.reaction,
+						timestamp: Date.now(),
+					},
+				])
+			);
+			broadcast({
+				x: cursor.x,
+				y: cursor.y,
+				value: cursorState.reaction,
+			});
+		}
+	}, 100);
 
 	const handlePointerMove = useCallback((e: React.PointerEvent) => {
 		e.preventDefault();
@@ -106,34 +155,15 @@ function Live() {
 			window.removeEventListener("keydown", onKeyDown);
 			window.removeEventListener("keyup", onKeyUp);
 		};
-	}, []);
+	}, [updateMyPresence]);
 
-	const setReaction = useCallback(() => {
+	const setReactions = useCallback((reaction: string) => {
 		setCursorState({
 			mode: CursorMode.Reaction,
-			reaction: ,
+			reaction,
 			isPressed: false,
 		});
 	}, []);
-
-	useInterval(() => {
-		if (
-			cursorState.mode === CursorMode.Reaction &&
-			cursorState.isPressed &&
-			cursor
-		) {
-			console.log("is reacting");
-			setReaction((reactions) =>
-				reactions.concat([
-					{
-						point: { x: cursor.x, y: cursor.y },
-						value: cursorState.reaction,
-						timestamp: Date.now(),
-					},
-				])
-			);
-		}
-	}, 100);
 
 	return (
 		<div
@@ -160,7 +190,7 @@ function Live() {
 				/>
 			)}
 			{cursorState.mode === CursorMode.ReactionSelector && (
-				// <ReactionSelector setReaction={setReactions} />
+				<ReactionSelector setReaction={setReactions} />
 			)}
 			<LiveCursors others={others} />
 		</div>
