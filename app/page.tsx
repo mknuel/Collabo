@@ -8,7 +8,10 @@ export default function Home() {
 	return (
 		<main className="h-screen overflow-hidden">
 			<Navbar />
-			<Live />
+
+			<div className="flex h-full flex-row">
+				<Live />
+			</div>
 		</main>
 	);
 }

@@ -10,28 +10,36 @@ function ActiveUsers() {
 	const currentUser = useSelf();
 	const hasMoreUsers = users.length > 3;
 
-	console.log(currentUser);
+    const memoizedUsers = useMemo(
+			() => (
+				<div className="flex items-center justify-between gap-1 p-2">
+					<div className="flex pl-3 w-fit">
+						{currentUser && (
+							<Avatar
+								name="You"
+								otherStyles="border-[3px] border-primary-green"
+							/>
+						)}
+						{users?.slice(0, 3)?.map(({ connectionId, info }) => {
+							return (
+								<Avatar
+									key={connectionId}
+									name={generateRandomName()}
+									otherStyles="-ml-3"
+								/>
+							);
+						})}
 
-	return (
-		<main className="flex h-screen w-full select-none place-content-center place-items-center">
-			{currentUser && (
-				<Avatar name="You" otherStyles="border-[3px] border-primary-green" />
-			)}
-			<div className="flex pl-3">
-				{users?.slice(0, 3)?.map(({ connectionId, info }) => {
-					return (
-						<Avatar
-							key={connectionId}
-							name={generateRandomName()}
-							otherStyles="-ml-3"
-						/>
-					);
-				})}
+						{hasMoreUsers && (
+							<div className={styles.more}>+{users.length - 3}</div>
+						)}
+					</div>
+				</div>
+			),
+			[users.length]
+		);
 
-				{hasMoreUsers && <div className={styles.more}>+{users.length - 3}</div>}
-			</div>
-		</main>
-	);
+		return memoizedUsers;
 }
 
 export default ActiveUsers;
