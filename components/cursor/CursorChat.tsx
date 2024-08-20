@@ -25,7 +25,7 @@ function CursorChat({
 		if (e.key === "Enter") {
 			setCursorState({
 				mode: CursorMode.Chat,
-				previousMessage: cursorState?.message,
+				previousMessage: cursorState.message,
 				message: "",
 			});
 		} else if (e.key === "Escape") {
