@@ -99,7 +99,7 @@ export const getShapeInfo = (shapeType: string) => {
 };
 
 export const exportToPdf = () => {
-  const canvas = document.querySelector("canvas");
+	/*   const canvas = document.querySelector("canvas");
 
   if (!canvas) return;
 
@@ -117,5 +117,5 @@ export const exportToPdf = () => {
   doc.addImage(data, "PNG", 0, 0, canvas.width, canvas.height);
 
   // download the pdf
-  doc.save("canvas.pdf");
+  doc.save("canvas.pdf"); */
 };
